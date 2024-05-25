@@ -48,10 +48,12 @@ public class Apipruebas {
                 case "Scan":
                 Set<JavaStartExplorerDTO> lista=  new HashSet <JavaStartExplorerDTO> ();
                 JavaStartExplorerDTO suelo1 = new JavaStartExplorerDTO();
-                lista.add(suelo1);
-                JavaStartExplorerDTO suelo2 = new JavaStartExplorerDTO();
-                lista.add(suelo2);
-                Resultado= lista;
+                
+       
+                Resultado= "Scaneo";
+                    break;
+                    case "Deploy Rover":
+
                     break;
             
                 default:
