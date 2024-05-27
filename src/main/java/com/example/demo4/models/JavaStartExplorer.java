@@ -53,6 +53,22 @@ public class JavaStartExplorer {
         return id;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setEstadoNave(String estadoNave) {
+        this.estadoNave = estadoNave;
+    }
+
+    public void setUbicacion(String ubicacion) {
+        this.ubicacion = ubicacion;
+    }
+
+    public void setActividad(String actividad) {
+        this.actividad = actividad;
+    }
+
 
 
 

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.aspectj.internal.lang.annotation.ajcDeclareAnnotation;
 import org.hibernate.mapping.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,7 +24,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
 
 import com.example.demo4.DTO.JavaStartExplorerDTO;
+import com.example.demo4.models.Intruccion;
 import com.example.demo4.models.JavaStartExplorer;
+import com.example.demo4.services.IntruccionServices;
 import com.example.demo4.services.JavaStartExplorerServices;
 import com.example.demo4.services.JavaStartExplorerServicesImpl;
 
@@ -35,27 +38,31 @@ public class Apipruebas {
      @Autowired
     JavaStartExplorerServices javaStartExplorerServices;
 
+    @Autowired
+    IntruccionServices intruccionServices;
+
     @GetMapping(value = "/prueba")
         public String algo(){
-            return "hola que tal";
+            return "Rover desplegado. terreno arido";
         }
+
+        //como hacer la parte de recibir intruccion con get
     @PostMapping(value = "/intruccion")
     @ResponseBody
     public ResponseEntity<Map<String,String>> intruccion (@RequestBody IntruccionDTO intruccionDTO){
         Object Resultado= null;
         try {
-            switch (intruccionDTO.getComando()) {
+            switch (intruccionDTO.getTipoIntruccion()) {
                 case "Scan":
-                Set<JavaStartExplorerDTO> lista=  new HashSet <JavaStartExplorerDTO> ();
-                JavaStartExplorerDTO suelo1 = new JavaStartExplorerDTO();
-                
-       
-                Resultado= "Scaneo";
+                Resultado= "Realice un escaneo del terreno y envíe los datos de regreso";
+                    break;
+                    case "Collect Sample":
+                    Resultado= "Recojer muestras del suelo y envíe de vuelta a la Tierra";
                     break;
                     case "Deploy Rover":
 
+                    Resultado= "Despliegue un rover en la superficie para explorar áreas específicas";
                     break;
-            
                 default:
                     break;
             }
@@ -70,31 +77,50 @@ public class Apipruebas {
         }
     }
 
-  
-    @GetMapping(value = "/telemetry")
+    //aca se envian datos y se almacenan en la base de datos.
+   @PostMapping(value = "/intruccion2")
     @ResponseBody
-    public ResponseEntity<Map<String,Object>> telemetry(){
+    public ResponseEntity<Map<String,String>> intruccion2 (@RequestBody IntruccionDTO intruccionDTO){
         try {
-            Set<JavaStartExplorerDTO> lista=  new HashSet <JavaStartExplorerDTO> ();
-            JavaStartExplorerDTO nave = new JavaStartExplorerDTO();
-          //  nave.setMuestraSuelo("rock");
-            lista.add(nave);
-            Map<String,Object> response = new HashMap<String,Object>();
+            Intruccion intruccion = new Intruccion(intruccionDTO);
+            intruccionServices.enviarDatos(intruccion);
+
+
+            Map response = new HashMap();
+            response.put("descripcion" , intruccion.getDescripcion());
             response.put("status","OK");
             response.put("code","200");
-            response.put("message", lista);
+            response.put("message", " enviado con exito");
             return new ResponseEntity<>(response, HttpStatus.OK);
          }
         catch (Exception e) {
-            return null;
+            return handleInternalServerError(e);
         }
-
     }
 
-    @PostMapping(value = "/telemetry2")
-    @ResponseBody
-    public ResponseEntity<Map<String, String>> telemetry2(@RequestBody JavaStartExplorerDTO javaStartExplorerDTO) {
+   @GetMapping(value = "/intruccion2/{id}")
+   @ResponseBody
+   public ResponseEntity<Map<String,String>> intruccion2 (int id){
+    try {
+        IntruccionDTO intruccion = new IntruccionDTO();
+        intruccion.getIntruccionID(id);
 
+        Map response = new HashMap();
+        
+        response.put("status","OK");
+        response.put("code","200");
+        response.put("descripcion" , intruccion.getDescripcion());
+        response.put("message", " enviado con exito");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+     }
+    catch (Exception e) {
+        return handleInternalServerError(e);
+    }
+   }
+
+    @PostMapping(value = "/telemetry")
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> telemetry(@RequestBody JavaStartExplorerDTO javaStartExplorerDTO) {
         try {
 
             JavaStartExplorer datos = new JavaStartExplorer(javaStartExplorerDTO);
@@ -116,7 +142,27 @@ public class Apipruebas {
             return handleInternalServerError(e);
         }
     }
+    
+  /*  @GetMapping(value = "/telemetry2")
+    @ResponseBody
+    public ResponseEntity<Map<String,Object>> telemetry2(){
+        try {
+            Set<JavaStartExplorerDTO> lista=  new HashSet <JavaStartExplorerDTO> ();
+            JavaStartExplorerDTO nave = new JavaStartExplorerDTO();
+          //  nave.setMuestraSuelo("rock");
+            lista.add(nave);
+            Map<String,Object> response = new HashMap<String,Object>();
+            response.put("status","OK");
+            response.put("code","200");
+            response.put("message", lista);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+         }
+        catch (Exception e) {
+            return null;
+        }
 
+    }
+ */
       //Excepciones en tiempo de serialización para web services
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
